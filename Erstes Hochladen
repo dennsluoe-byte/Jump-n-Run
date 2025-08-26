@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pixel Jumper</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Pixel Jumper</h1>
+  <p>Drücke LEERTASTE oder Klicke, um zu springen!</p>
+  <div id="game-container">
+    <div id="player"></div>
+    <div id="obstacle"></div>
+  </div>
+  <p>Punkte: <span id="score">0</span></p>
+  <script src="script.js"></script>
+</body>
+</html>
+body {
+  background-color: black;
+  color: lime;
+  font-family: 'Press Start 2P', monospace;
+  text-align: center;
+  user-select: none;
+}
+
+#game-container {
+  position: relative;
+  width: 600px;
+  height: 200px;
+  margin: 20px auto;
+  border: 2px solid lime;
+  overflow: hidden;
+  background-color: #111;
+}
+
+#player {
+  width: 20px;
+  height: 20px;
+  background-color: red;
+  position: absolute;
+  bottom: 0;
+  left: 50px;
+}
+
+#obstacle {
+  width: 20px;
+  height: 20px;
+  background-color: blue;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+const player = document.getElementById('player');
+const obstacle = document.getElementById('obstacle');
+const scoreEl = document.getElementById('score');
+
+let jumping = false;
+let score = 0;
+
+function jump() {
+  if (jumping) return;
+  jumping = true;
+  let jumpHeight = 0;
+  const upInterval = setInterval(() => {
+    if (jumpHeight >= 80) {
+      clearInterval(upInterval);
+      const downInterval = setInterval(() => {
+        if (jumpHeight <= 0) {
+          clearInterval(downInterval);
+          jumping = false;
+        }
+        jumpHeight -= 5;
+        player.style.bottom = jumpHeight + 'px';
+      }, 20);
+    }
+    jumpHeight += 5;
+    player.style.bottom = jumpHeight + 'px';
+  }, 20);
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.code === 'Space') jump();
+});
+
+document.addEventListener('click', jump);
+
+// Hindernis bewegen
+let obstaclePos = 600;
+function moveObstacle() {
+  obstaclePos -= 5;
+  if (obstaclePos < -20) {
+    obstaclePos = 600;
+    score++;
+    scoreEl.textContent = score;
+  }
+  obstacle.style.right = obstaclePos + 'px';
+  
+  // Kollision prüfen
+  const playerBottom = parseInt(player.style.bottom);
+  if (obstaclePos < 70 && obstaclePos > 50 && playerBottom < 20) {
+    alert('Game Over! Punkte: ' + score);
+    obstaclePos = 600;
+    score = 0;
+    scoreEl.textContent = score;
+  }
+  
+  requestAnimationFrame(moveObstacle);
+}
+
+moveObstacle();
